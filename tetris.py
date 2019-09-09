@@ -91,7 +91,7 @@ class Tetris:
     def __init__(self, length=19+3+1, width=10+2):
         board = np.zeros((length, width))
         for i in board:
-            i[0]=3
+            i[0]=5
             i[len(i)-1] = 3
         board[len(board)-1] = np.array([4 for i in range(width)])
         self.board = board
@@ -106,10 +106,13 @@ class Tetris:
         for i in range(len_x):
             for j in range(len_y):
                 x, y = (np.array(invariant_point_board_pos) + 
-                       (np.array([i, j]) - np.array(block.invariant_point)))
+                        (np.array([i, j]) - np.array(block.invariant_point)))
 
+                if block.form[i][j]!=0 and self.board[x][y]==5:
+                    return self.move_block(block, invariant_point_board_pos + np.array([0,1]))
+                
                 if block.form[i][j]!=0 and self.board[x][y]==3:
-                    all_cell_pos[i][j] = np.array([x, y, int(block.form[i][j])])
+                    return self.move_block(block, invariant_point_board_pos + np.array([0,-1]))
 
                 #Condición para garantizar movimientos validos
                 if block.form[i][j]!=0 and (self.board[x][y]==2 or self.board[x][y]==4):
@@ -121,9 +124,6 @@ class Tetris:
 
     def move_block(self, block, invariant_cell_block_position):
         all_cell_pos = self.block_position_on_board(block, invariant_cell_block_position)
-
-        if np.array_equal(all_cell_pos, np.array([0,-1])):
-            pass
 
         if np.array_equal(all_cell_pos, np.array([-1,-1])):
             self.set_block()
