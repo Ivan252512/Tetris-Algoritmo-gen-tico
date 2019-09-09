@@ -1,16 +1,15 @@
 import numpy as np
-import threading
-import time
 
 class Block:
-    def __init__(self):
-        self.form = np.zeros((1,1))
+    def __init__(self, inv_cell_pos):
+        self.inv_cell_pos = inv_cell_pos
 
     def rotate(self):
         raise NotImplementedError
 
 class O(Block):
-    def __init__(self):
+    def __init__(self, inv_cell_pos):
+        Block.__init__(self, inv_cell_pos)
         self.form = np.ones((2, 2))
         self.invariant_point = np.array([0, 0])
 
@@ -18,7 +17,8 @@ class O(Block):
         pass
 
 class I(Block):
-    def __init__(self):
+    def __init__(self, inv_cell_pos):
+        Block.__init__(self, inv_cell_pos)
         self.form = np.ones((1, 4))
         self.invariant_point = np.array([0, 2])
 
@@ -27,7 +27,8 @@ class I(Block):
         self.invariant_point = np.array([2, 0])
 
 class Z(Block):
-    def __init__(self):
+    def __init__(self, inv_cell_pos):
+        Block.__init__(self, inv_cell_pos)
         Z = np.ones((3, 3))
         Z[1][0] = 0
         Z[0][2] = 0
@@ -39,7 +40,8 @@ class Z(Block):
         self.form = np.rot90(self.form, 1, (1,0))
 
 class S(Block):
-    def __init__(self):
+    def __init__(self, inv_cell_pos):
+        Block.__init__(self, inv_cell_pos)
         S = np.ones((3, 3))
         S[0][0] = 0
         S[1][2] = 0
@@ -51,7 +53,8 @@ class S(Block):
         self.form = np.rot90(self.form, 1, (1,0))
 
 class L(Block):
-    def __init__(self):
+    def __init__(self, inv_cell_pos):
+        Block.__init__(self, inv_cell_pos)
         L = np.ones((3, 3))
         L[0][0] = 0
         L[0][1] = 0
@@ -63,7 +66,8 @@ class L(Block):
         self.form = np.rot90(self.form, 1, (1,0))
 
 class J(Block):
-    def __init__(self):
+    def __init__(self, inv_cell_pos):
+        Block.__init__(self, inv_cell_pos)
         J = np.ones((3, 3))
         J[0][1] = 0
         J[0][2] = 0
@@ -75,7 +79,8 @@ class J(Block):
         self.form = np.rot90(self.form, 1, (1,0))
 
 class T(Block):
-    def __init__(self):
+    def __init__(self, inv_cell_pos):
+        Block.__init__(self, inv_cell_pos)
         T = np.ones((3, 3))
         T[0][0] = 0
         T[0][2] = 0
@@ -95,47 +100,8 @@ class Tetris:
             i[len(i)-1] = 3
         board[len(board)-1] = np.array([4 for i in range(width)])
         self.board = board
-        self.valid_moves = np.array([[0,0], [0,-1], [1, 0], [-1, 0]])
-
-    def block_position_on_board(self, block, invariant_point_board_pos):
-        all_cell_pos = np.zeros(block.form.shape, dtype=object)
-
-        len_x = len(block.form)
-        len_y = len(block.form[0])
-
-        for i in range(len_x):
-            for j in range(len_y):
-                x, y = (np.array(invariant_point_board_pos) + 
-                        (np.array([i, j]) - np.array(block.invariant_point)))
-
-                if block.form[i][j]!=0 and self.board[x][y]==5:
-                    return self.move_block(block, invariant_point_board_pos + np.array([0,1]))
-                
-                if block.form[i][j]!=0 and self.board[x][y]==3:
-                    return self.move_block(block, invariant_point_board_pos + np.array([0,-1]))
-
-                #Condición para garantizar movimientos validos
-                if block.form[i][j]!=0 and (self.board[x][y]==2 or self.board[x][y]==4):
-                    return np.array([-1,-1])
-            
-                all_cell_pos[i][j] = np.array([x, y, int(block.form[i][j])])
-
-        return all_cell_pos
-
-    def move_block(self, block, invariant_cell_block_position):
-        all_cell_pos = self.block_position_on_board(block, invariant_cell_block_position)
-
-        if np.array_equal(all_cell_pos, np.array([-1,-1])):
-            self.set_block()
-            self.clean_to_next_position()
-            print(self.board)
-            return 
-            
-        else:
-            self.clean_to_next_position()
-            self.update_board(all_cell_pos)
-            print(self.board)
-            self.move_block(block, invariant_cell_block_position + np.array([1, 1]))
+        #self.valid_moves = np.array([[1, 0]])
+        self.valid_moves = np.array([[0,0], [0,-1], [0, 1], [1, 0]])
 
     def clean_to_next_position(self):
         len_i, len_j = self.board.shape
@@ -157,4 +123,57 @@ class Tetris:
                 if self.board[i][j] == 1:
                     self.board[i][j] = 2
 
+    def valid_move(self, block, invariant_point_board_pos):
+        len_x = len(block.form)
+        len_y = len(block.form[0])
 
+        for i in range(len_x):
+            for j in range(len_y):
+                x, y = (np.array(invariant_point_board_pos) + 
+                        (np.array([i, j]) - np.array(block.invariant_point)))
+
+                #Condición para garantizar movimientos validos
+                if block.form[i][j]!=0 and (self.board[x][y]==2 or self.board[x][y]==4 or self.board[x][y]==5 or self.board[x][y]==3):
+                    return False
+
+        return True
+
+    def block_position_on_board(self, block, invariant_point_board_pos):
+        all_cell_pos = np.zeros(block.form.shape, dtype=object)
+
+        len_x = len(block.form)
+        len_y = len(block.form[0])
+
+        for i in range(len_x):
+            for j in range(len_y):
+                x, y = (np.array(invariant_point_board_pos) + 
+                        (np.array([i, j]) - np.array(block.invariant_point)))
+
+                all_cell_pos[i][j] = np.array([x, y, int(block.form[i][j])])
+
+        return all_cell_pos
+
+    def move_down(self, block):
+        block.inv_cell_pos = block.inv_cell_pos + np.array([1, 0])
+        if not self.valid_move(block, block.inv_cell_pos):
+            self.set_block()
+            return 
+        self.block_position_on_board(block, block.inv_cell_pos)
+        all_cell_pos = self.block_position_on_board(block, block.inv_cell_pos)
+        self.clean_to_next_position()
+        self.update_board(all_cell_pos)
+
+    def move(self, block, move):
+        block.inv_cell_pos = block.inv_cell_pos + move
+        if not self.valid_move(block, block.inv_cell_pos):
+            block.inv_cell_pos = block.inv_cell_pos - move
+        self.block_position_on_board(block, block.inv_cell_pos)
+        all_cell_pos = self.block_position_on_board(block, block.inv_cell_pos)
+        self.clean_to_next_position()
+        self.update_board(all_cell_pos)
+    
+    def game_over(self):
+        for i in self.board[2]:
+            if i==2:
+                return True
+        return False
