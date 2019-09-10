@@ -102,6 +102,7 @@ class Tetris:
         self.board = board
         #self.valid_moves = np.array([[1, 0]])
         self.valid_moves = np.array([[0,0], [0,-1], [0, 1], [1, 0]])
+        self.score = 0
 
     def clean_to_next_position(self):
         len_i, len_j = self.board.shape
@@ -157,11 +158,15 @@ class Tetris:
         block.inv_cell_pos = block.inv_cell_pos + np.array([1, 0])
         if not self.valid_move(block, block.inv_cell_pos):
             self.set_block()
-            return 
+            self.clean_to_next_position()
+            print(self.board)
+            return False
         self.block_position_on_board(block, block.inv_cell_pos)
         all_cell_pos = self.block_position_on_board(block, block.inv_cell_pos)
         self.clean_to_next_position()
         self.update_board(all_cell_pos)
+        print(self.board)
+        return True
 
     def move(self, block, move):
         block.inv_cell_pos = block.inv_cell_pos + move
@@ -171,6 +176,7 @@ class Tetris:
         all_cell_pos = self.block_position_on_board(block, block.inv_cell_pos)
         self.clean_to_next_position()
         self.update_board(all_cell_pos)
+        print(self.board)
     
     def game_over(self):
         for i in self.board[2]:

@@ -1,6 +1,6 @@
 import tetris
 import random
-import threading
+import time
 import numpy as np
 
 O = lambda inv_cell_pos : tetris.O(inv_cell_pos)
@@ -18,22 +18,19 @@ def randomBlock(blocks_letter, inv_cell_pos):
     rand = random.randint(0, len(blocks_letter)-1)
     return blocks_letter[rand](inv_cell_pos)
 
-def move(tetris_board, block, moves): 
-    timer = threading.Timer(1.0, tetris_board.move_down, [block]) 
-    timer.start()
+def move(tetris_board, block, moves, rotates): 
+    
+    for i in range(rotates):
+        block.rotate()
+
     for i in range(len(moves[0])):
-        if np.array_equal(move, np.array([0, 1])):
-            tetris_board.move_down(block)
-            timer.cancel()
-            return move(tetris_board, block, moves[0][i+1:])
-        else:
-            tetris_board.move(block, moves[0][i])
-        print(tetris_board.board)
+        tetris_board.move(block, moves[0][i])
 
 class __init__:
     t = tetris.Tetris()
+
     while not t.game_over():
-        rand = random.randint(0,150)
+        rand = random.randint(0, 10)
         moves_options = t.valid_moves
         moves = np.zeros((1, rand), dtype=object)
         len_i = rand - 1
@@ -41,5 +38,9 @@ class __init__:
             rand_move = random.randint(0,len(moves_options)-1)
             moves[0][i] = moves_options[rand_move]
         block = randomBlock(blocks, np.array([1, 5]))
-        move(t, block, moves)
+        rotates = random.randint(0,4)
+
+        while t.move_down(block):
+            move(t, block, moves, rotates)
+            print(t.board)
 
