@@ -42,5 +42,6 @@ class __init__:
 
         while t.move_down(block):
             move(t, block, moves, rotates)
+            print(t.score)
             print(t.board)
 

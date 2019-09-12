@@ -183,3 +183,21 @@ class Tetris:
             if i==2:
                 return True
         return False
+
+    def update_score(self):
+        len_i, len_j = self.board.shape
+        for i in range(len_i):
+            update = True
+            for j in range(len_j):
+                if self.board[i][j] != 2:
+                    update = False
+            if update:
+                self.score += 10
+                
+
+    def destroy_row(self, row):
+        if row==1:
+            return
+        for i in len(range(self.board[0])):
+            self.board[row][i] = self.board[row-1][i]
+        return self.destroy_row(row-1)
