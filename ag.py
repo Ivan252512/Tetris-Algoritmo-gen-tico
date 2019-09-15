@@ -1,7 +1,7 @@
 import numpy as np
 import random
-from funcionOptimizada import f
 import multiprocessing
+import play
 
 """Algoritmo genético"""
 
@@ -67,40 +67,34 @@ def poblacion(cantidad,bitsDeCadaIndividuo):
    apto, los reproduce y la descendencia remplaza al 50% menos apto"""
 
 def eval(x):
-   return [f(x[0],x[1],x[2]),x[3],x[4],x[5],x[6]]
+   return [play.run_backend_with_parameters(x[0],x[1],x[2],x[3]), x[4], x[5]]
 
 resultado = []
-
 evaluaciones = []
-def evolucion(a,b,t,individuosx,individuosy,individuost,iteraciones):
+def evolucion(posint,rotint,individuospos,individuosrot,iteraciones, board, block):
     global evaluaciones, resultado
-    print("---------------------------------------------------------")
-    if len(individuosx)!=len(individuosy)!=len(individuost):
+    if len(individuospos)!=len(individuosrot):
         return "Las poblaciones iniciales deben tener la misma longitud."
     #Selección
 
     aEvaluar = []
     evaluacionRepetida = []
 
-    for i in range(len(individuosx)):
+    for i in range(len(individuospos)):
         contiene = False
         for j in resultado:
-            if (j[1]==individuosx[i] and j[2]==individuosy[i] and
-                j[3]==individuost[i]):
-                evaluacionRepetida.append([j[0], j[1], j[2], j[3], iteraciones])
+            if (j[1]==individuospos[i] and j[2]==individuosrot[i]):
+                evaluacionRepetida.append([j[0], j[1], j[2]])
                 contiene = True
-                print(binToDec(j[1],a,b), binToDec(j[2],a,b),
-                      int(binToDec(j[3],0,t)), j[0])
                 break
 
         if not contiene:
-            aEvaluar.append([binToDec(individuosx[i],a,b),
-                             binToDec(individuosy[i],a,b),
-                             int(binToDec(individuost[i],0,t)),
-                             individuosx[i],
-                             individuosy[i],
-                             individuost[i],
-                             iteraciones])
+            aEvaluar.append([board,
+                             block,
+                             binToDec(individuospos[i],posint[0],posint[1]),
+                             binToDec(individuosrot[i],rotint[0],rotint[1]),
+                             individuospos[i],
+                             individuosrot[i]])
 
     p = multiprocessing.Pool(4)
     evaluacionNoRepetida = p.map(eval, aEvaluar)
@@ -119,44 +113,38 @@ def evolucion(a,b,t,individuosx,individuosy,individuost,iteraciones):
 
 
     for i in range(len(mejores50)):
-        mejores50bin.append([mejores50[i][1],mejores50[i][2],mejores50[i][3]])
-        hijos.append([cruza(mejores50[random.randint(0,int(len(mejores50)/4)-1)][1],
-                            mejores50[random.randint(0,int(len(mejores50)/4)-1)][1]),
-                      cruza(mejores50[random.randint(0,int(len(mejores50)/4)-1)][2],
-                            mejores50[random.randint(0,int(len(mejores50)/4)-1)][2]),
-                      cruza(mejores50[random.randint(0,int(len(mejores50)/4)-1)][3],
-                            mejores50[random.randint(0,int(len(mejores50)/4)-1)][3])])
+        mejores50bin.append([mejores50[i][4],mejores50[i][5]])
+        hijos.append([cruza(mejores50[random.randint(0,int(len(mejores50)/4)-1)][4],
+                            mejores50[random.randint(0,int(len(mejores50)/4)-1)][4]),
+                      cruza(mejores50[random.randint(0,int(len(mejores50)/4)-1)][5],
+                            mejores50[random.randint(0,int(len(mejores50)/4)-1)][5])])
 
     #Mutación, solo los hijos mutan.
     for i in range(int(len(hijos)/random.randint(1,4))):
-        randx=random.randint(0,len(hijos)-1)
-        hijos[randx][0]=mutacion(hijos[randx][0])
+        randpos=random.randint(0,len(hijos)-1)
+        hijos[randpos][0]=mutacion(hijos[randpos][0])
 
-        randy=random.randint(0,len(hijos)-1)
-        hijos[randy][1]=mutacion(hijos[randy][1])
-
-        randt=random.randint(0,len(hijos)-1)
-        hijos[randt][2]=mutacion(hijos[randt][2])
+        randrot=random.randint(0,len(hijos)-1)
+        hijos[randrot][1]=mutacion(hijos[randrot][1])
 
 
     #Junta a los padres y a los hijos
     nuevaGeneracion=(mejores50bin[:len(mejores50bin)/2]+
                      mejores50bin[:len(mejores50bin)-len(mejores50bin)/2]+
                      hijos)
-    genx=[]
-    geny=[]
-    gent=[]
+
+    genpos=[]
+    genrot=[]
     for i in range(len(nuevaGeneracion)):
-        genx.append(nuevaGeneracion[i][0])
-        geny.append(nuevaGeneracion[i][1])
-        gent.append(nuevaGeneracion[i][2])
+        genpos.append(nuevaGeneracion[i][4])
+        genrot.append(nuevaGeneracion[i][5])
+
 
     if(iteraciones==0):
         resultado.sort()
         decimales=[]
         for i in resultado:
-            decimales.append([binToDec(i[1],a,b),binToDec(i[2],a,b),
-                              int(binToDec(i[3],0,t)),i[0],i[4]])
+            decimales.append([i[0],binToDec(i[1],posint[0],posint[1]),binToDec(i[2],rotint[0],rotint[1])])
         return decimales
     else:
-        return  evolucion(a,b,t,genx,geny,gent,iteraciones-1)
+        return  evolucion(posint,rotint,genpos,genrot,iteraciones-1,board,block)

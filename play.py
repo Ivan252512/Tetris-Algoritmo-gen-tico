@@ -18,30 +18,55 @@ def randomBlock(blocks_letter, inv_cell_pos):
     rand = random.randint(0, len(blocks_letter)-1)
     return blocks_letter[rand](inv_cell_pos)
 
-def move(tetris_board, block, moves, rotates): 
-    
-    for i in range(rotates):
-        block.rotate()
-
+def move(tetris_board, block, moves): 
     for i in range(len(moves[0])):
         tetris_board.move(block, moves[0][i])
 
-class __init__:
+def run_only_backend():
+    while True:
+        t = tetris.Tetris()
+        while not t.game_over():
+            rand = random.randint(0, 10)
+            moves_options = t.valid_moves
+            moves = np.zeros((1, rand), dtype=object)
+            len_i = rand - 1
+            for i in range(len_i):
+                rand_move = random.randint(0,len(moves_options)-1)
+                moves[0][i] = moves_options[rand_move]
+            block = randomBlock(blocks, np.array([1, 5]))
+            rotates = random.randint(0,3)
+            for i in range(rotates):
+                block.rotate()
+
+            while t.move_down(block):
+                time.sleep(0.5)
+                move(t, block, moves)
+                print(t.score)
+                print(t.board)
+
+def run_backend_with_parameters(t, block, moves, rotates):
+    while not t.game_over():
+        for i in range(rotates):
+            block.rotate()
+        while t.move_down(block):
+            move(t, block, moves)
+        return t.score, t.board
+
+def train():
     t = tetris.Tetris()
 
-    while not t.game_over():
-        rand = random.randint(0, 10)
-        moves_options = t.valid_moves
-        moves = np.zeros((1, rand), dtype=object)
-        len_i = rand - 1
-        for i in range(len_i):
-            rand_move = random.randint(0,len(moves_options)-1)
-            moves[0][i] = moves_options[rand_move]
-        block = randomBlock(blocks, np.array([1, 5]))
-        rotates = random.randint(0,4)
+    rand = random.randint(0, 3)
+    moves_options = t.valid_moves
+    moves = np.zeros((1, rand), dtype=object)
+    len_i = rand - 1
+    for i in range(len_i):
+        rand_move = random.randint(0,len(moves_options)-1)
+        moves[0][i] = moves_options[rand_move]
 
-        while t.move_down(block):
-            move(t, block, moves, rotates)
-            print(t.score)
-            print(t.board)
+    block = randomBlock(blocks, np.array([1, 5]))
+    rotates = random.randint(0,3)
+    for i in range(rotates):
+        block.rotate()
+    
+
 

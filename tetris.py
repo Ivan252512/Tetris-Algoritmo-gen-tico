@@ -93,12 +93,16 @@ class T(Block):
 
 
 class Tetris:
-    def __init__(self, length=19+3+1, width=10+2):
+    def __init__(self, length=20+3+1, width=10+2, preload_board=np.zeros((1, 1))):
         board = np.zeros((length, width))
         for i in board:
             i[0]=5
             i[len(i)-1] = 3
         board[len(board)-1] = np.array([4 for i in range(width)])
+        if not np.array_equal(np.zeros((1, 1)), preload_board):
+            for i in range(len(preload_board[0])):
+                for j in range(len(preload_board)):
+                    board[j+3][i+1] = preload_board[j][i]
         self.board = board
         #self.valid_moves = np.array([[1, 0]])
         self.valid_moves = np.array([[0,0], [0,-1], [0, 1], [1, 0]])
@@ -159,13 +163,11 @@ class Tetris:
         if not self.valid_move(block, block.inv_cell_pos):
             self.set_block()
             self.clean_to_next_position()
-            print(self.board)
             return False
         self.block_position_on_board(block, block.inv_cell_pos)
         all_cell_pos = self.block_position_on_board(block, block.inv_cell_pos)
         self.clean_to_next_position()
         self.update_board(all_cell_pos)
-        print(self.board)
         return True
 
     def move(self, block, move):
@@ -176,7 +178,6 @@ class Tetris:
         all_cell_pos = self.block_position_on_board(block, block.inv_cell_pos)
         self.clean_to_next_position()
         self.update_board(all_cell_pos)
-        print(self.board)
     
     def game_over(self):
         for i in self.board[2]:
@@ -194,7 +195,6 @@ class Tetris:
             if update:
                 self.score += 10
                 
-
     def destroy_row(self, row):
         if row==1:
             return
