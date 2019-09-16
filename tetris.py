@@ -1,4 +1,5 @@
 import numpy as np
+from func import powerset, array_equals
 
 class Block:
     def __init__(self, inv_cell_pos):
@@ -105,7 +106,8 @@ class Tetris:
                     board[j+3][i+1] = preload_board[j][i]
         self.board = board
         #self.valid_moves = np.array([[1, 0]])
-        self.valid_moves = np.array([[0,0], [0,-1], [0, 1], [1, 0]])
+        self.valid_moves = np.array(powerset([[0,0], [0,-1], [0, 1], [1, 0]]))
+        self.valid_rotates = np.array([0,1,2,3])
         self.score = 0
 
     def clean_to_next_position(self):
@@ -185,6 +187,7 @@ class Tetris:
                 return True
         return False
 
+    """
     def update_score(self):
         len_i, len_j = self.board.shape
         for i in range(len_i):
@@ -201,3 +204,36 @@ class Tetris:
         for i in len(range(self.board[0])):
             self.board[row][i] = self.board[row-1][i]
         return self.destroy_row(row-1)
+    """
+
+    def moment_score(self):
+        this_board = self.board
+
+        score = 0
+        in_a_row = 0
+        past = 0
+
+        for i in range(len(this_board)):
+            for j in range(len(this_board[0])):
+                in_a_row += past if past>0 else 0
+                past = past + 1 if this_board[i][j] == 2 else 0
+            score += in_a_row 
+
+
+        eval_cell_lenght = 3
+        penalized = [1, 0, 1]
+        for i in range(len(this_board)-2):
+            for j in range(len(this_board[0])):
+                assess_array = []
+                for e in range(eval_cell_lenght):
+                    assess_array.append(this_board[i+e][j])
+                if array_equals(assess_array, penalized):
+                    score *= 0.6
+        
+        return score
+
+                
+
+
+
+

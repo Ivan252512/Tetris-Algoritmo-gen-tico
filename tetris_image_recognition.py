@@ -6,6 +6,11 @@ from PIL import Image, ImageFilter
 import screenshot
 from operator import itemgetter
 
+import play
+import time
+import copy
+
+
 # load model
 block_model = load_model('image/block_mnist.h5py')
 
@@ -94,14 +99,31 @@ def crop_block(image_path, new_size, save_path, contour=True):
     return im
 
 
-screenshot.screenshot(5)
+while True:
+    screenshot.screenshot(5)
 
-crop_board = crop_block("image/realtime_screenshot/screenshot.png", (821, 200, 1084, 685), "image/realtime_screenshot/board/screenshot.png",contour=False)
-crop_block("image/realtime_screenshot/screenshot.png", (1175, 235, 1275, 335), "image/realtime_screenshot/block/screenshot.png")
+    crop_board = crop_block("image/realtime_screenshot/screenshot.png", (821, 200, 1084, 685), "image/realtime_screenshot/board/screenshot.png",contour=False)
+    crop_block("image/realtime_screenshot/screenshot.png", (1175, 235, 1275, 335), "image/realtime_screenshot/block/screenshot.png")
 
-board = image_to_board(crop_board)
-block = get_prediction("image/realtime_screenshot/block/screenshot.png")
+    tetris_board = image_to_board(crop_board)
+    block = get_block_type(get_prediction("image/realtime_screenshot/block/screenshot.png"))(np.array([1, 5])) 
 
-print(board.board)
-print(get_block_type(block)(np.array([1, 5])).form)
+
+
+    moves = tetris_board.valid_moves
+    rotates = tetris_board.valid_rotates
+
+
+    score = tetris_board.moment_score()
+
+    for i in rotates:
+        for j in moves:
+            tetris_board_copy = copy.copy(tetris_board)
+            block_copy = copy.copy(block)
+            play.move(tetris_board_copy, block_copy, j, i)
+
+            print(tetris_board_copy.moment_score())
+
+    while tetris_board.move_down(block):
+        pass
 

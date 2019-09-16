@@ -71,7 +71,8 @@ def eval(x):
 
 resultado = []
 evaluaciones = []
-def evolucion(posint,rotint,individuospos,individuosrot,iteraciones, board, block):
+def evolucion(posint,rotint,individu
+ospos,individuosrot,iteraciones, board, block):
     global evaluaciones, resultado
     if len(individuospos)!=len(individuosrot):
         return "Las poblaciones iniciales deben tener la misma longitud."
