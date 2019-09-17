@@ -2,7 +2,7 @@ from itertools import chain, combinations_with_replacement
 
 def powerset(iterable):
     s = list(iterable)
-    return list(chain.from_iterable(combinations_with_replacement(s, r) for r in range(len(s)+1)))
+    return list(chain.from_iterable(combinations_with_replacement(s, r) for r in range(len(s)+1)))[1:]
 
 def array_equals(a, b):
     if len(a)==len(b)==0:

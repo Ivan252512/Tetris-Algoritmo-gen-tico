@@ -22,30 +22,9 @@ def move(tetris_board, block, moves, rotates):
     for i in range(rotates):
         block.rotate()
         
-    for i in range(len(moves[0])):
-        tetris_board.move(block, moves[0][i])
+    for i in moves:
+        tetris_board.move(block, i)
 
-def run_only_backend():
-    while True:
-        t = tetris.Tetris()
-        while not t.game_over():
-            rand = random.randint(0, 10)
-            moves_options = t.valid_moves
-            moves = np.zeros((1, rand), dtype=object)
-            len_i = rand - 1
-            for i in range(len_i):
-                rand_move = random.randint(0,len(moves_options)-1)
-                moves[0][i] = moves_options[rand_move]
-            block = randomBlock(blocks, np.array([1, 5]))
-            rotates = random.randint(0,3)
-            for i in range(rotates):
-                block.rotate()
-
-            while t.move_down(block):
-                time.sleep(0.5)
-                move(t, block, moves)
-                print(t.score)
-                print(t.board)
 
 
 

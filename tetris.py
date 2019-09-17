@@ -215,7 +215,7 @@ class Tetris:
 
         for i in range(len(this_board)):
             for j in range(len(this_board[0])):
-                in_a_row += past if past>0 else 0
+                in_a_row += 1 if past>0 else 0
                 past = past + 1 if this_board[i][j] == 2 else 0
             score += in_a_row 
 
@@ -228,7 +228,7 @@ class Tetris:
                 for e in range(eval_cell_lenght):
                     assess_array.append(this_board[i+e][j])
                 if array_equals(assess_array, penalized):
-                    score *= 0.6
+                    score *= 0.95
         
         return score
 

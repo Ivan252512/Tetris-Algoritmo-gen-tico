@@ -1,9 +1,9 @@
 import pyautogui
 import time
 
-def screenshot(delay):
+def screenshot(delay, name):
     time.sleep(delay)
     screenshot = pyautogui.screenshot()
-    screenshot.save("image/realtime_screenshot/screenshot.png")
+    screenshot.save(name)
 
 

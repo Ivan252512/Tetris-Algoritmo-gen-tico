@@ -10,6 +10,9 @@ import play
 import time
 import copy
 
+import keyboard
+from func import array_equals
+
 
 # load model
 block_model = load_model('image/block_mnist.h5py')
@@ -41,7 +44,6 @@ def get_block_type(prediction):
         for j in predicciones:
             if float(j[0])>=float(a[0]):
                 a = j
-    print(a)
     return a[1]
 
 
@@ -99,8 +101,10 @@ def crop_block(image_path, new_size, save_path, contour=True):
     return im
 
 
+mov_to_keyboard = [[[0,0], ''], [[0,-1], 'a'], [[0, 1], 's'], [[1, 0], 'd']]
+
 while True:
-    screenshot.screenshot(5)
+    screenshot.screenshot(4, "image/realtime_screenshot/screenshot.png") 
 
     crop_board = crop_block("image/realtime_screenshot/screenshot.png", (821, 200, 1084, 685), "image/realtime_screenshot/board/screenshot.png",contour=False)
     crop_block("image/realtime_screenshot/screenshot.png", (1175, 235, 1275, 335), "image/realtime_screenshot/block/screenshot.png")
@@ -109,21 +113,39 @@ while True:
     block = get_block_type(get_prediction("image/realtime_screenshot/block/screenshot.png"))(np.array([1, 5])) 
 
 
+    
+    print(tetris_board.board)
+    print(block.form)
 
     moves = tetris_board.valid_moves
     rotates = tetris_board.valid_rotates
-
-
-    score = tetris_board.moment_score()
+    
+    best_game = tetris_board
+    best_rot = tetris_board.valid_rotates[0]
+    best_mov = tetris_board.valid_moves[0]
 
     for i in rotates:
         for j in moves:
-            tetris_board_copy = copy.copy(tetris_board)
-            block_copy = copy.copy(block)
+            tetris_board_copy = copy.deepcopy(tetris_board)
+            block_copy = copy.deepcopy(block)
             play.move(tetris_board_copy, block_copy, j, i)
 
-            print(tetris_board_copy.moment_score())
+            while tetris_board_copy.move_down(block_copy):
+                pass
 
-    while tetris_board.move_down(block):
-        pass
+            if tetris_board_copy.moment_score()>best_game.moment_score():
+                best_game = tetris_board_copy
+                best_mov = j
+                best_rot = i
+
+
+    for i in range(best_rot):
+        keyboard.press_and_release('w') 
+
+    for i in best_mov:
+        for j in mov_to_keyboard:
+            if array_equals(i, j[0]):
+                if j[1]!='':
+                    keyboard.press_and_release(j[1]) 
+
 
